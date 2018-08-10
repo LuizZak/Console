@@ -305,6 +305,49 @@ class PagesTests: ConsoleTestCase {
             """)
             .printIfAsserted()
     }
+    
+    func testCanHandleEmptyInput() {
+        let pageItems: [String] = [
+            "Item 1", "Item 2"
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "")
+        mock.addMockInput(line: "0")
+        mock.addMockInput(line: "0")
+        
+        let sut =
+            makePagesTestMenu(console: mock,
+                              items: pageItems,
+                              perPageCount: 3,
+                              canHandleEmptyInput: true,
+                              command: { input in mock.printLine("Received '\(input)'"); return .loop(nil) })
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 1
+            """)
+            .checkInputEntered("")
+            .checkNext("Received ''")
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 1
+            """)
+            .printIfAsserted()
+        
+    }
 }
 
 extension PagesTests {
@@ -317,11 +360,16 @@ extension PagesTests {
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClient, items: [String], perPageCount: Int,
+    func makePagesTestMenu(console: ConsoleClient,
+                           items: [String],
+                           perPageCount: Int,
+                           canHandleEmptyInput: Bool = false,
                            command: @escaping (String) throws -> Pages.PagesCommandResult) -> TestMenuController {
         
         let configuration =
-            Pages.PageDisplayConfiguration(commandPrompt: nil, commandClosure: command)
+            Pages.PageDisplayConfiguration(commandPrompt: nil,
+                                           canHandleEmptyInput: canHandleEmptyInput,
+                                           commandClosure: command)
         
         return makePagesTestMenu(console: console) { menu in
             let pages = menu.console.makePages(configuration: configuration)
@@ -331,7 +379,9 @@ extension PagesTests {
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClient, items: [String], perPageCount: Int,
+    func makePagesTestMenu(console: ConsoleClient,
+                           items: [String],
+                           perPageCount: Int,
                            command: PagesCommandHandler) -> TestMenuController {
         
         return makePagesTestMenu(console: console) { menu in

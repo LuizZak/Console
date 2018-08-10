@@ -120,7 +120,10 @@ public class Pages {
                 }
                 
                 // Quit
-                if newPage == "0" || newPage == "" {
+                if newPage == "0" {
+                    return .quit
+                }
+                if newPage.isEmpty && configuration?.commandHandler.canHandleEmptyInput != true {
                     return .quit
                 }
                 
@@ -231,11 +234,13 @@ public class Pages {
         
         public init(clearOnDisplay: Bool = true,
                     commandPrompt: String? = nil,
+                    canHandleEmptyInput: Bool = false,
                     commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
             
             self.clearOnDisplay = clearOnDisplay
             commandHandler =
                 InnerPageCommandHandler(commandPrompt: commandPrompt,
+                                        canHandleEmptyInput: canHandleEmptyInput,
                                         commandClosure: commandClosure)
         }
         
@@ -247,10 +252,12 @@ public class Pages {
     
     /// Result of a paging command
     ///
-    /// - loop: Loops the page back to where it is
+    /// - loop: Loops the page back to where it is, displaying a message on the
+    /// next loop.
     /// - showMessageThenLoop: Shows a message, halting the standard input until
     /// the user presses enter, then resumes in loop mode.
-    /// - quit: Quits the page back to the calling menu
+    /// - quit: Quits the page back to the calling menu, displaying a specified
+    /// message afterwards.
     /// - print: Prints a message to the console and re-loops
     /// - modifyList: Called to modify the contents being displayed on the list
     public enum PagesCommandResult {
@@ -263,15 +270,18 @@ public class Pages {
     private struct InnerPageCommandHandler: PagesCommandHandler {
         public let commandPrompt: String?
         public let commandClosure: ((String) throws -> PagesCommandResult)?
+        public let canHandleEmptyInput: Bool
         
         var acceptsCommands: Bool {
             return commandClosure != nil
         }
         
         public init(commandPrompt: String? = nil,
+                    canHandleEmptyInput: Bool = false,
                     commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
             
             self.commandPrompt = commandPrompt
+            self.canHandleEmptyInput = canHandleEmptyInput
             self.commandClosure = commandClosure
         }
         
@@ -285,6 +295,7 @@ public class Pages {
 public protocol PagesCommandHandler {
     var commandPrompt: String? { get }
     var acceptsCommands: Bool { get }
+    var canHandleEmptyInput: Bool { get }
     
     func executeCommand(_ input: String) throws -> Pages.PagesCommandResult
 }
