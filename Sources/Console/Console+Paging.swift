@@ -17,8 +17,9 @@ public class Pages {
     /// The data is understood as a sequence of columns.
     /// The function also supports a special command closure that interprets 
     /// lines started with '=' with a special closure
-    public func displayPages<T: ConsoleDataProvider>(withProvider provider: T,
-                                                     perPageCount: Int = 30) where T.Data == [String] {
+    public func displayPages<T, U>(withProvider provider: T,
+                                   perPageCount: Int = 30) where T: ConsoleDataProvider, U: CustomStringConvertible, T.Data == [U] {
+        
         var page = 0
         let pageCount = Int(ceil(Float(provider.count) / Float(perPageCount)))
 
@@ -46,7 +47,7 @@ public class Pages {
                 
                 for index in minItem..<maxItem {
                     var input = ["\(index + 1):"]
-                    input.append(contentsOf: provider.data(atIndex: index))
+                    input.append(contentsOf: provider.data(atIndex: index).map { $0.description })
                     
                     table.append(input)
                 }
@@ -81,14 +82,14 @@ public class Pages {
                     }
                     
                     // Command
-                    if !input.hasPrefix("=") && configuration?.commandHandler.commandClosure != nil {
+                    if !input.hasPrefix("=") && configuration?.commandHandler.acceptsCommands == true {
                         return true
                     }
                     
                     // Direct page index
                     guard input.hasPrefix("="), let index = Int(input.dropFirst()) else {
                         // If not a number, check with command
-                        if configuration?.commandHandler.commandClosure != nil {
+                        if configuration?.commandHandler.acceptsCommands == true {
                             return true
                         }
                         
@@ -135,13 +136,13 @@ public class Pages {
                 }
                 
                 // Command
-                if (!newPage.hasPrefix("=") || Int(newPage.dropFirst()) == nil) && configuration?.commandHandler.commandClosure != nil {
-                    if let command = configuration?.commandHandler.commandClosure {
+                if (!newPage.hasPrefix("=") || Int(newPage.dropFirst()) == nil) && configuration?.commandHandler.acceptsCommands == true {
+                    if let commandHandler = configuration?.commandHandler {
                         do {
                             return try autoreleasepool {
                                 let com = newPage.hasPrefix("=") ? String(newPage.dropFirst()) : newPage
                                 
-                                switch try command(com) {
+                                switch try commandHandler.executeCommand(com) {
                                 case .loop(let msg):
                                     if let msg = msg {
                                         message = msg
@@ -200,11 +201,11 @@ public class Pages {
     
     /// Displays a sequence of items as a paged list of items, which the user 
     /// can interact by selecting the page to display
-    public func displayPages<T: ConsoleDataProvider>(withProvider provider: T,
-                                                     perPageCount: Int = 30) where T.Data == String {
+    public func displayPages<T>(withProvider provider: T,
+                                perPageCount: Int = 30) where T: ConsoleDataProvider {
         
-        let provider = AnyConsoleDataProvider(provider: provider) { (source: String) -> [String] in
-            return [source]
+        let provider = AnyConsoleDataProvider<[T.Data]>(provider: provider) { item in
+            return [item]
         }
         
         displayPages(withProvider: provider, perPageCount: perPageCount)
@@ -212,19 +213,12 @@ public class Pages {
     
     /// Displays a sequence of items as a paged list of items, which the user
     /// can interact by selecting the page to display
-    public func displayPages(withValues values: [String], header: String = "", perPageCount: Int = 30) {
-        let provider = AnyConsoleDataProvider(count: values.count, header: header) { index -> [String] in
+    public func displayPages<S>(withValues values: [S],
+                                header: String = "",
+                                perPageCount: Int = 30) where S: CustomStringConvertible {
+        
+        let provider = AnyConsoleDataProvider<[S]>(count: values.count, header: header) { index in
             return [values[index]]
-        }
-        
-        displayPages(withProvider: provider, perPageCount: perPageCount)
-    }
-    
-    /// Displays a sequence of items as a paged list of items, which the user
-    /// can interact by selecting the page to display
-    public func displayPages<S: CustomStringConvertible>(withValues values: [S], header: String = "", perPageCount: Int = 30) {
-        let provider = AnyConsoleDataProvider(count: values.count, header: header) { index -> [String] in
-            return [values[index].description]
         }
         
         displayPages(withProvider: provider, perPageCount: perPageCount)
@@ -235,10 +229,14 @@ public class Pages {
         public let clearOnDisplay: Bool
         public let commandHandler: PagesCommandHandler
         
-        public init(clearOnDisplay: Bool = true, commandPrompt: String? = nil, commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+        public init(clearOnDisplay: Bool = true,
+                    commandPrompt: String? = nil,
+                    commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+            
             self.clearOnDisplay = clearOnDisplay
             commandHandler =
-                InnerPageCommandHandler(commandPrompt: commandPrompt, commandClosure: commandClosure)
+                InnerPageCommandHandler(commandPrompt: commandPrompt,
+                                        commandClosure: commandClosure)
         }
         
         public init(commandHandler: PagesCommandHandler, clearOnDisplay: Bool = true) {
@@ -266,9 +264,19 @@ public class Pages {
         public let commandPrompt: String?
         public let commandClosure: ((String) throws -> PagesCommandResult)?
         
-        public init(commandPrompt: String? = nil, commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+        var acceptsCommands: Bool {
+            return commandClosure != nil
+        }
+        
+        public init(commandPrompt: String? = nil,
+                    commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+            
             self.commandPrompt = commandPrompt
             self.commandClosure = commandClosure
+        }
+        
+        func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
+            return try commandClosure?(input) ?? .quit(nil)
         }
     }
 }
@@ -276,5 +284,7 @@ public class Pages {
 /// Handler for paging commands
 public protocol PagesCommandHandler {
     var commandPrompt: String? { get }
-    var commandClosure: ((String) throws -> Pages.PagesCommandResult)? { get }
+    var acceptsCommands: Bool { get }
+    
+    func executeCommand(_ input: String) throws -> Pages.PagesCommandResult
 }
