@@ -59,7 +59,7 @@ public class Pages {
                 
                 // Closure that validates two types of inputs:
                 // - Relative page changes (e.g.: '+1', '-10', '+2' etc., with no bounds)
-                // - Absolute page (e.g. 1, 2, 3, etc., from 1 - pageCount)
+                // - Absolute page (e.g. '=1', '=2', '=3', etc., from 1 - pageCount)
                 let pageValidateNew: (String) -> Bool = { [console, configuration] input in
                     // 0: Return tu upper menu
                     if input == "0" {
