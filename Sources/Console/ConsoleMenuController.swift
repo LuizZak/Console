@@ -167,9 +167,3 @@ open class MenuController {
         case exit
     }
 }
-
-fileprivate func strongSelf(_ value: MenuController?, execute: (MenuController) -> ()) {
-    if let value = value {
-        execute(value)
-    }
-}
