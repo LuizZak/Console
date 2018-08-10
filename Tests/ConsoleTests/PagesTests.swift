@@ -35,6 +35,34 @@ class PagesTests: ConsoleTestCase {
             .printIfAsserted()
     }
     
+    func testEmptyPages() {
+        let pageItems: [String] = []
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "0")
+        mock.addMockInput(line: "0")
+        
+        let sut = makePagesTestMenu(console: mock, items: pageItems, perPageCount: 30)
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            = Menu
+            Please select an option bellow:
+            """)
+            .checkNext("""
+            A list of things
+            ----
+            ---- 0 to 0
+            = Page 1 of 1
+            """)
+            .checkInputEntered("0")
+            .checkNext("Babye!")
+            .printIfAsserted()
+    }
+    
     func testPagesWithPaging() {
         let pageItems: [String] = [
             "Item 1", "Item 2", "Item 3", "Item 4"

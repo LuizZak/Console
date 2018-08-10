@@ -21,7 +21,7 @@ public class Pages {
                                    perPageCount: Int = 30) where T: ConsoleDataProvider, U: CustomStringConvertible, T.Data == [U] {
         
         var page = 0
-        let pageCount = Int(ceil(Float(provider.count) / Float(perPageCount)))
+        let pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
 
         var message: String?
 
@@ -54,7 +54,7 @@ public class Pages {
                 
                 console.displayTable(withValues: table, separator: " ")
                 
-                console.printLine("---- \(minItem + 1) to \(maxItem)")
+                console.printLine("---- \(min(minItem + 1, maxItem)) to \(maxItem)")
                 console.printLine("= Page \(page + 1) of \(pageCount)")
                 
                 // Closure that validates two types of inputs:
