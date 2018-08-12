@@ -42,7 +42,8 @@ public class Pages {
                 console.printLine("----")
                 
                 // Map each value into [[1, item1], [2, item2], [3, item3], ...]
-                // and pass it into the table display routine to allow it to evenly nice the items
+                // and pass it into the table display routine to allow it to nicely
+                // align the items into columns
                 var table: [[String]] = []
                 
                 for index in minItem..<maxItem {

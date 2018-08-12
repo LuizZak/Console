@@ -43,6 +43,61 @@ class ConsoleMenuControllerTests: ConsoleTestCase {
             .printIfAsserted()
     }
     
+    func testManyChoicedMenu() {
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "2")
+        mock.addMockInput(line: "0")
+        
+        let sut = TestMenuController(console: mock)
+        
+        sut.builder = { menu in
+            menu.createMenu(name: "Test menu") { (menu, item) in
+                for i in 1...10 {
+                    menu.addAction(name: "Action \(i)") { menu in
+                        menu.console.printLine("Chose \(i)!")
+                    }
+                }
+            }
+        }
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+                = Test menu
+                Please select an option bellow:
+                1: Action 1
+                2: Action 2
+                3: Action 3
+                4: Action 4
+                5: Action 5
+                6: Action 6
+                7: Action 7
+                8: Action 8
+                9: Action 9
+                10: Action 10
+                0: Exit
+                """)
+            .checkInputEntered("2")
+            .checkNext("""
+                Chose 2!
+                = Test menu
+                Please select an option bellow:
+                1: Action 1
+                2: Action 2
+                3: Action 3
+                4: Action 4
+                5: Action 5
+                6: Action 6
+                7: Action 7
+                8: Action 8
+                9: Action 9
+                10: Action 10
+                0: Exit
+                """)
+            .printIfAsserted()
+    }
+    
     func testNoMemoryCyclesInMenuBuilding() {
         var didDeinit = false
         let mock = makeMockConsole()
@@ -118,7 +173,7 @@ class TestMenuController: MenuController {
         super.init(console: console)
     }
     
-    init(console: ConsoleClient, onDeinit: @escaping () -> ()) {
+    init(console: ConsoleClient, onDeinit: @escaping () -> () = { }) {
         self.onDeinit = onDeinit
         super.init(console: console)
     }

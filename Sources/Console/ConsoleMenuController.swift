@@ -25,13 +25,15 @@ open class MenuController {
     }
     
     public func performAction(action: Action, parents: [MenuItem]) {
-        switch(action) {
+        switch action {
         case .exit:
             console.recordExitCode(0)
+            
         case .closure(let closure):
             autoreleasepool {
                 closure()
             }
+            
         case .subMenu(let menu):
             autoreleasepool {
                 displayMenu(menu: menu, parents: parents)
@@ -118,7 +120,9 @@ open class MenuController {
     }
     
     @discardableResult
-    public func createMenu(name: String, initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void) -> MenuItem {
+    public func createMenu(name: String,
+                           initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void) -> MenuItem {
+        
         let menu = currentBuildingMenu
         defer {
             currentBuildingMenu = menu
@@ -129,7 +133,10 @@ open class MenuController {
         return m
     }
     
-    public func createMenu(name: String, targetActions: inout [(title: String, action: Action)]?, initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void) -> MenuItem {
+    public func createMenu(name: String,
+                           targetActions: inout [(title: String, action: Action)]?,
+                           initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void) -> MenuItem {
+        
         var item = MenuItem(name: name, actions: [])
         targetActions?.append((name, .subMenu(menu: item)))
         initializer(self, &item)

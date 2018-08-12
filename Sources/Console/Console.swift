@@ -104,14 +104,15 @@ open class Console: ConsoleClient {
     /// of elements within.
     ///
     /// The table is automatically adjusted so the columns are spaced evenly
-    /// across items of multiple lengths.
+    /// across strings of multiple lengths.
     open func displayTable(withValues values: [[String]], separator: String) {
         // Measure maximum length of values on each column
         var columnWidths: [Int] = []
         
         for line in values {
             for (i, cell) in line.enumerated() {
-                // Make sure we have the minimum ammount of storage for storing this column
+                // Make sure we have the minimum ammount of storage for storing
+                // this column
                 while(columnWidths.count <= i) {
                     columnWidths.append(0)
                 }
@@ -147,7 +148,10 @@ open class Console: ConsoleClient {
         } while true
     }
     
-    open func readLineWith(prompt: String, allowEmpty: Bool = true, validate: (String) -> Bool = { _ in true }) -> String? {
+    open func readLineWith(prompt: String,
+                           allowEmpty: Bool = true,
+                           validate: (String) -> Bool = { _ in true }) -> String? {
+        
         repeat {
             let input = readSureLineWith(prompt: prompt)
             
@@ -163,7 +167,10 @@ open class Console: ConsoleClient {
         } while true
     }
 
-    open func parseLineWith<T>(prompt: String, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T? {
+    open func parseLineWith<T>(prompt: String,
+                               allowEmpty: Bool,
+                               parse: (String) -> ValueReadResult<T>) -> T? {
+        
         repeat {
             let input = readSureLineWith(prompt: prompt)
             
@@ -252,7 +259,9 @@ open class Console: ConsoleClient {
     static func measureString(_ string: String) -> Int {
         do {
             // Regex to ignore ASCII coloring from string
-            let regex = try NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]", options: [])
+            let regex =
+                try NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]",
+                                        options: [])
             
             let range = NSRange(location: 0, length: (string as NSString).length)
             
