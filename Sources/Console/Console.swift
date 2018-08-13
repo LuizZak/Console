@@ -25,7 +25,7 @@ public protocol ConsoleClient {
     /// - Returns: First input that was correctly validated, or if `allowEmpty` is
     /// `true`, an empty input line, if the user specified no input.
     func readLineWith(prompt: String, allowEmpty: Bool, validate: (String) -> Bool) -> String?
-
+    
     /// Reads a line from the console, performing a parsing step with the user's
     /// input.
     ///
@@ -56,10 +56,19 @@ public protocol ConsoleClient {
     
     /// Performs a terminal command to navigate/alter the output.
     func command(_ command: Terminal.Command)
-
+    
     /// Clears the entire screen buffer
     func clearScreen()
-
+    
+    /// Starts running an alternative screen buffer on which the subsequent output
+    /// should be displayed in.
+    /// Does nothing if already in alternative screen buffer mode.
+    func startAlternativeScreenBuffer()
+    
+    /// Return from the alternative screen buffer.
+    /// Does nothing if not currently in alternative screen buffer mode.
+    func stopAlternativeScreenBuffer()
+    
     /// Called to record the given exit code for the console's program
     func recordExitCode(_ code: Int)
     
@@ -78,10 +87,16 @@ public enum ValueReadResult<T> {
 
 /// Helper console-interation interface
 open class Console: ConsoleClient {
-    private final var outputSink: OutputSink
+    private var outputSink: OutputSink
+    
+    private var isInAlternativeBuffer = false
     
     /// Target output stream to print messages to
     public final var output: TextOutputStream
+    
+    /// If true, erases scrollback when calling `eraseScreen`.
+    /// Defaults to true.
+    public var eraseScrollback: Bool = true
     
     /// Initializes this console class with the default standard output stream
     public convenience init() {
@@ -240,7 +255,39 @@ open class Console: ConsoleClient {
     open func clearScreen() {
         command(.eraseScreen)
         command(.moveHome)
-        command(.eraseScreenAndScrollback)
+        if eraseScrollback {
+            command(.eraseScreenAndScrollback)
+        }
+    }
+    
+    open func startAlternativeScreenBuffer() {
+        if isInAlternativeBuffer {
+            return
+        }
+        
+        let process =
+            Process
+                .launchedProcess(launchPath: "/usr/bin/tput",
+                                 arguments: ["smcup"])
+        
+        process.waitUntilExit()
+        
+        isInAlternativeBuffer = true
+    }
+    
+    open func stopAlternativeScreenBuffer() {
+        if !isInAlternativeBuffer {
+            return
+        }
+        
+        let process =
+            Process
+                .launchedProcess(launchPath: "/usr/bin/tput",
+                                 arguments: ["rmcup"])
+        
+        process.waitUntilExit()
+        
+        isInAlternativeBuffer = false
     }
     
     open func recordExitCode(_ code: Int) {
