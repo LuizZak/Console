@@ -261,6 +261,7 @@ open class Console: ConsoleClient {
     }
     
     open func startAlternativeScreenBuffer() {
+        #if !Xcode
         if isInAlternativeBuffer {
             return
         }
@@ -271,11 +272,13 @@ open class Console: ConsoleClient {
                                  arguments: ["smcup"])
         
         process.waitUntilExit()
+        #endif
         
         isInAlternativeBuffer = true
     }
     
     open func stopAlternativeScreenBuffer() {
+        #if !Xcode
         if !isInAlternativeBuffer {
             return
         }
@@ -286,6 +289,7 @@ open class Console: ConsoleClient {
                                  arguments: ["rmcup"])
         
         process.waitUntilExit()
+        #endif
         
         isInAlternativeBuffer = false
     }
