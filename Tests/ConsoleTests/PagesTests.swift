@@ -35,6 +35,41 @@ class PagesTests: ConsoleTestCase {
             .printIfAsserted()
     }
     
+    func testPagesWithColumns() {
+        let pageItems: [[String]] = [
+            ["Item 1", "Column 2-1"],
+            ["Item 2", "Column 2-2"],
+            ["Item 3 with long name", "Column 2-3"],
+            ["Item 4", "Column 2-4"]
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "0")
+        mock.addMockInput(line: "0")
+        
+        let sut = makePagesTestMenu(console: mock, rows: pageItems, perPageCount: 30)
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            = Menu
+            Please select an option bellow:
+            """)
+            .checkNext("""
+            ----
+            1: Item 1                Column 2-1
+            2: Item 2                Column 2-2
+            3: Item 3 with long name Column 2-3
+            4: Item 4                Column 2-4
+            ---- 1 to 4
+            """)
+            .checkInputEntered("0")
+            .checkNext("Babye!")
+            .printIfAsserted()
+    }
+    
     func testEmptyPages() {
         let pageItems: [String] = []
         
@@ -348,14 +383,79 @@ class PagesTests: ConsoleTestCase {
             .printIfAsserted()
         
     }
+    
+    func testModifyPagesAction() {
+        let pageItems: [String] = [
+            "Item 1", "Item 2"
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "command")
+        mock.addMockInput(line: "0")
+        mock.addMockInput(line: "0")
+        
+        let sut =
+            makePagesTestMenu(
+                console: mock,
+                items: pageItems,
+                perPageCount: 3) { _ -> Pages.PagesCommandResult in
+                    return .modifyList {
+                        _ in ArrayConsoleDataProvider(header: "Another list of things",
+                                                      items: ["Other item 1",
+                                                              "Other item 2",
+                                                              "Other item 3"])
+                    }
+                }
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 1
+            """)
+            .checkInputEntered("command")
+            .checkNext("""
+            Another list of things
+            ----
+            1: Other item 1
+            2: Other item 2
+            3: Other item 3
+            ---- 1 to 3
+            = Page 1 of 1
+            """)
+            .printIfAsserted()
+    }
 }
 
 extension PagesTests {
-    func makePagesTestMenu(console: ConsoleClient, items: [String], perPageCount: Int) -> TestMenuController {
+    func makePagesTestMenu(console: ConsoleClient,
+                           items: [String],
+                           perPageCount: Int) -> TestMenuController {
+        
         return makePagesTestMenu(console: console) { menu in
             let pages = menu.console.makePages()
             
-            pages.displayPages(withValues: items, header: "A list of things",
+            pages.displayPages(withValues: items,
+                               header: "A list of things",
+                               perPageCount: perPageCount)
+        }
+    }
+    
+    func makePagesTestMenu(console: ConsoleClient,
+                           rows: [[String]],
+                           perPageCount: Int) -> TestMenuController {
+        
+        return makePagesTestMenu(console: console) { menu in
+            let pages = menu.console.makePages()
+            
+            pages.displayPages(withRows: rows,
+                               header: "A list of things",
                                perPageCount: perPageCount)
         }
     }
@@ -374,7 +474,8 @@ extension PagesTests {
         return makePagesTestMenu(console: console) { menu in
             let pages = menu.console.makePages(configuration: configuration)
             
-            pages.displayPages(withValues: items, header: "A list of things",
+            pages.displayPages(withValues: items,
+                               header: "A list of things",
                                perPageCount: perPageCount)
         }
     }
@@ -388,7 +489,8 @@ extension PagesTests {
             let config = Pages.PageDisplayConfiguration(commandHandler: command)
             let pages = menu.console.makePages(configuration: config)
             
-            pages.displayPages(withValues: items, header: "A list of things",
+            pages.displayPages(withValues: items,
+                               header: "A list of things",
                                perPageCount: perPageCount)
         }
     }

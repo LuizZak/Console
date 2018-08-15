@@ -17,11 +17,18 @@ public class Pages {
     /// The data is understood as a sequence of columns.
     /// The function also supports a special command closure that interprets 
     /// lines started with '=' with a special closure
-    public func displayPages<T, U>(withProvider provider: T,
-                                   perPageCount: Int = 30) where T: ConsoleDataProvider, U: CustomStringConvertible, T.Data == [U] {
+    public func displayPages(withProvider provider: ConsoleDataProvider,
+                             perPageCount: Int = 30) {
         
         var page = 0
-        let pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
+        var pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
+        
+        var provider = provider {
+            didSet {
+                page = 0
+                pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
+            }
+        }
 
         var message: String?
 
@@ -48,7 +55,7 @@ public class Pages {
                 
                 for index in minItem..<maxItem {
                     var input = ["\(index + 1):"]
-                    input.append(contentsOf: provider.data(atIndex: index).map { $0.description })
+                    input.append(contentsOf: provider.displayTitles(forRow: index).map { $0.description })
                     
                     table.append(input)
                 }
@@ -61,7 +68,7 @@ public class Pages {
                 // Closure that validates two types of inputs:
                 // - Relative page changes (e.g.: '+1', '-10', '+2' etc., with no bounds)
                 // - Absolute page (e.g. '=1', '=2', '=3', etc., from 1 - pageCount)
-                let pageValidateNew: (String) -> Bool = { [console, configuration] input in
+                let pageValidateNew: (String) -> Bool = { [configuration] input in
                     // 0: Return tu upper menu
                     if input == "0" {
                         return true
@@ -167,10 +174,9 @@ public class Pages {
                                     return .quit
                                     
                                 case .modifyList(let closure):
-                                    defer {
-                                        closure(self)
-                                    }
-                                    return .quit
+                                    provider = closure(self)
+                                    
+                                    return .loop
                                 }
                             }
                         } catch {
@@ -203,26 +209,27 @@ public class Pages {
         } while(true)
     }
     
-    /// Displays a sequence of items as a paged list of items, which the user 
-    /// can interact by selecting the page to display
-    public func displayPages<T>(withProvider provider: T,
-                                perPageCount: Int = 30) where T: ConsoleDataProvider {
+    /// Displays a sequence of items as a paged list of items, which the user can
+    /// interact by selecting the page to display
+    public func displayPages<S>(withValues values: [S],
+                                header: String = "",
+                                perPageCount: Int = 30) where S: CustomStringConvertible {
         
-        let provider = AnyConsoleDataProvider<[T.Data]>(provider: provider) { item in
-            return [item]
+        let provider = AnyConsoleDataProvider(count: values.count, header: header) { index in
+            return [values[index]]
         }
         
         displayPages(withProvider: provider, perPageCount: perPageCount)
     }
     
-    /// Displays a sequence of items as a paged list of items, which the user
-    /// can interact by selecting the page to display
-    public func displayPages<S>(withValues values: [S],
+    /// Displays a sequence of items as a paged list of rows, which the user can
+    /// interact by selecting the page to display
+    public func displayPages<S>(withRows values: [[S]],
                                 header: String = "",
                                 perPageCount: Int = 30) where S: CustomStringConvertible {
         
-        let provider = AnyConsoleDataProvider<[S]>(count: values.count, header: header) { index in
-            return [values[index]]
+        let provider = AnyConsoleDataProvider(count: values.count, header: header) { index in
+            return values[index]
         }
         
         displayPages(withProvider: provider, perPageCount: perPageCount)
@@ -265,7 +272,7 @@ public class Pages {
         case loop(String?)
         case showMessageThenLoop(String?)
         case quit(String?)
-        case modifyList((Pages) -> ())
+        case modifyList((Pages) -> (ConsoleDataProvider))
     }
     
     private struct InnerPageCommandHandler: PagesCommandHandler {
