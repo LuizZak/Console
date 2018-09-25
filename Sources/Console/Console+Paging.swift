@@ -23,15 +23,20 @@ public class Pages {
         var page = 0
         var pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
         
-        var provider = provider {
-            didSet {
+        var provider = provider
+        func switchProvider(to other: ConsoleDataProvider, keepPageIndex: Bool) {
+            provider = other
+            pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
+            
+            if keepPageIndex {
+                page = max(0, min(page, pageCount))
+            } else {
                 page = 0
-                pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
             }
         }
-
+        
         var message: String?
-
+        
         repeat {
             if configuration?.clearOnDisplay == true {
                 console.clearScreen()
@@ -173,8 +178,8 @@ public class Pages {
                                     }
                                     return .quit
                                     
-                                case .modifyList(let closure):
-                                    provider = closure(self)
+                                case let .modifyList(keepPageIndex, closure):
+                                    switchProvider(to: closure(self), keepPageIndex: keepPageIndex)
                                     
                                     return .loop
                                 }
@@ -272,7 +277,7 @@ public class Pages {
         case loop(String?)
         case showMessageThenLoop(String?)
         case quit(String?)
-        case modifyList((Pages) -> (ConsoleDataProvider))
+        case modifyList(keepPageIndex: Bool, (Pages) -> (ConsoleDataProvider))
     }
     
     private struct InnerPageCommandHandler: PagesCommandHandler {
