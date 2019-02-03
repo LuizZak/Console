@@ -400,7 +400,7 @@ class PagesTests: ConsoleTestCase {
                 console: mock,
                 items: pageItems,
                 perPageCount: 3) { _ -> Pages.PagesCommandResult in
-                    return .modifyList {
+                    return .modifyList(keepPageIndex: false) {
                         _ in ArrayConsoleDataProvider(header: "Another list of things",
                                                       items: ["Other item 1",
                                                               "Other item 2",

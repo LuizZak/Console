@@ -24,7 +24,7 @@ public extension Terminal.Command {
     /**
         Converts the command to its ansi code.
     */
-    public var ansi: String {
+    var ansi: String {
         switch self {
         case .moveHome:
             return "H".ansi
