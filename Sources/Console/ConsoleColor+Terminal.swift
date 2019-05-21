@@ -20,7 +20,7 @@ extension String {
      */
     public func terminalColorize(_ color: ConsoleColor) -> String {
         
-        #if !DEBUG
+        #if !Xcode
             return color.terminalForeground.ansi + self + UInt8(0).ansi
         #else
             return self
@@ -31,7 +31,7 @@ extension String {
      Strips this entire string of terminal color commands
      */
     public func stripTerminalColors() -> String {
-        #if !DEBUG
+        #if !Xcode
             guard let regex = try? NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]", options: []) else {
                 return self
             }
