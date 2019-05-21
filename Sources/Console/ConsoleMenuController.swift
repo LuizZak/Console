@@ -52,7 +52,7 @@ open class MenuController {
         var message: String? = nil
 
         repeat {
-            let result: Console.CommandMenuResult = autoreleasepool {
+            let result: Console.CommandMenuResult = autoreleasepool { () -> Console.CommandMenuResult in
                 console.clearScreen()
 
                 console.printLine("= \(menusBreadcrumb)")
@@ -80,7 +80,7 @@ open class MenuController {
                     return .quit
                 }
                 
-                if input.hasPrefix("e") || input.hasPrefix("q") {
+                if input.hasPrefix("e" as String) || input.hasPrefix("q" as String) {
                     console.recordExitCode(0)
                     return .quit
                 }

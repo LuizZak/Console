@@ -21,7 +21,7 @@ public class Pages {
                              perPageCount: Int = 30) {
         
         var page = 0
-        var pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
+        var pageCount: Int = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
         
         var provider = provider
         func switchProvider(to other: ConsoleDataProvider, keepPageIndex: Bool) {
@@ -42,7 +42,7 @@ public class Pages {
                 console.clearScreen()
             }
 
-            let result: Console.CommandMenuResult = autoreleasepool {
+            let result: Console.CommandMenuResult = autoreleasepool { () -> Console.CommandMenuResult in
                 let minItem = min(page * perPageCount, provider.count)
                 let maxItem = min(minItem + perPageCount, provider.count)
                 
