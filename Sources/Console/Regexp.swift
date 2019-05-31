@@ -23,9 +23,15 @@ func regexpMatches(regex regexString: String, in string: String) throws -> [Rege
         throw RegexError.invalidRegexString
     }
     
+    #if os(Linux)
+    if regexec(&regex, cString, maxMatches, &matches, 0) == Int32(REG_NOMATCH.rawValue) {
+        return []
+    }
+    #else
     if regexec(&regex, cString, maxMatches, &matches, 0) == REG_NOMATCH {
         return []
     }
+    #endif
     
     for match in matches where match.rm_so != -1 {
         let start = string.index(string.startIndex, offsetBy: Int(match.rm_so))
