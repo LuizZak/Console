@@ -1,6 +1,7 @@
 #if os(macOS)
-import Darwin.C
-import ObjectiveC
+import Foundation
+#elseif os(Linux)
+import Glibc
 #endif
 
 /// A publicly-facing protocol for console clients
@@ -264,16 +265,16 @@ open class Console: ConsoleClient {
     }
     
     open func startAlternativeScreenBuffer() {
-        #if !Xcode
         if isInAlternativeBuffer {
             return
         }
         
+        #if !Xcode && os(macOS)
         let process =
             Process
                 .launchedProcess(launchPath: "/usr/bin/tput",
                                  arguments: ["smcup"])
-        
+
         process.waitUntilExit()
         #endif
         
@@ -281,16 +282,16 @@ open class Console: ConsoleClient {
     }
     
     open func stopAlternativeScreenBuffer() {
-        #if !Xcode
         if !isInAlternativeBuffer {
             return
         }
         
+        #if !Xcode && os(macOS)
         let process =
             Process
                 .launchedProcess(launchPath: "/usr/bin/tput",
                                  arguments: ["rmcup"])
-        
+
         process.waitUntilExit()
         #endif
         
