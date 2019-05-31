@@ -5,10 +5,10 @@ class ConsoleTests: XCTestCase {
     func testMeasureString() {
         XCTAssertEqual(Console.measureString(""), 0)
         XCTAssertEqual(Console.measureString("abc"), 3)
-        XCTAssertEqual(Console.measureString("abc def gh"), 10)
+        XCTAssertEqual(Console.measureString("abc def g"), 9)
     }
     
-    func testMeasureStringWithTerminalAnsiCodes() {
-        XCTAssertEqual(Console.measureString("\u{001B}[30mHello, \u{001B}[30mWorld!\u{001B}[30m"), 13)
+    func testMeasureStringTerminalEscapeCharacters() {
+        XCTAssertEqual(Console.measureString("\u{001B}[10mHello, \u{001B}[11mWorld!"), 13)
     }
 }

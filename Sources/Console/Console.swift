@@ -1,4 +1,7 @@
-import Foundation
+#if os(macOS)
+import Darwin.C
+import ObjectiveC
+#endif
 
 /// A publicly-facing protocol for console clients
 public protocol ConsoleClient {
@@ -308,21 +311,7 @@ open class Console: ConsoleClient {
     
     /// Measures the number of visible characters for a given string input
     static func measureString(_ string: String) -> Int {
-        do {
-            // Regex to ignore ASCII coloring from string
-            let regex =
-                try NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]",
-                                        options: [])
-            
-            let range = NSRange(location: 0, length: (string as NSString).length)
-            
-            let results = regex.matches(in: string, options: [], range: range)
-            let removed = results.reduce(0) { $0 + $1.range.length }
-            
-            return string.count - removed
-        } catch {
-            return string.count
-        }
+        return lengthWithNoAnsiCommands(string)
     }
 
     /// Helper closure for clarifying behavior of commands and actions that
