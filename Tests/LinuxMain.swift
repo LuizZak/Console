@@ -1,6 +1,8 @@
 import XCTest
-@testable import ConsoleTests
 
-XCTMain([
-    testCase(ConsoleTests.allTests),
-])
+import ConsoleTests
+
+var tests = [XCTestCaseEntry]()
+tests += ConsoleTests.__allTests()
+
+XCTMain(tests)
