@@ -1,9 +1,4 @@
-#if os(macOS)
-import Darwin.C
-import ObjectiveC
-#elseif os(Linux)
-import Glibc
-#endif
+import Foundation
 
 /// Allows the user to navigate and select through pages of items, allowing them
 /// to perform specific actions on items, as well.

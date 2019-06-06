@@ -1,8 +1,4 @@
-#if os(macOS)
 import Foundation
-#elseif os(Linux)
-import Glibc
-#endif
 
 /// A publicly-facing protocol for console clients
 public protocol ConsoleClient {
@@ -265,16 +261,16 @@ open class Console: ConsoleClient {
     }
     
     open func startAlternativeScreenBuffer() {
+        #if !Xcode
         if isInAlternativeBuffer {
             return
         }
         
-        #if !Xcode && os(macOS)
         let process =
             Process
                 .launchedProcess(launchPath: "/usr/bin/tput",
                                  arguments: ["smcup"])
-
+        
         process.waitUntilExit()
         #endif
         
@@ -282,16 +278,16 @@ open class Console: ConsoleClient {
     }
     
     open func stopAlternativeScreenBuffer() {
+        #if !Xcode
         if !isInAlternativeBuffer {
             return
         }
         
-        #if !Xcode && os(macOS)
         let process =
             Process
                 .launchedProcess(launchPath: "/usr/bin/tput",
                                  arguments: ["rmcup"])
-
+        
         process.waitUntilExit()
         #endif
         
@@ -312,7 +308,21 @@ open class Console: ConsoleClient {
     
     /// Measures the number of visible characters for a given string input
     static func measureString(_ string: String) -> Int {
-        return lengthWithNoAnsiCommands(string)
+        do {
+            // Regex to ignore ASCII coloring from string
+            let regex =
+                try NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]",
+                                        options: [])
+            
+            let range = NSRange(location: 0, length: (string as NSString).length)
+            
+            let results = regex.matches(in: string, options: [], range: range)
+            let removed = results.reduce(0) { $0 + $1.range.length }
+            
+            return string.count - removed
+        } catch {
+            return string.count
+        }
     }
 
     /// Helper closure for clarifying behavior of commands and actions that

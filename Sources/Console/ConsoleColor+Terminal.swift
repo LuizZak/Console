@@ -6,6 +6,8 @@
 //  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
 //
 
+import Cocoa
+
 // This code is based off Vapor's Console library
 //
 // http://github.com/vapor/console
@@ -30,7 +32,25 @@ extension String {
      */
     public func stripTerminalColors() -> String {
         #if !Xcode
-            return (try? stripAnsiCommands(self)) ?? self
+            guard let regex = try? NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]", options: []) else {
+                return self
+            }
+            
+            let results = regex.matches(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count))
+            //let removed = results.reduce(0) { $0 + $1.range.length }
+            
+            // Remove ranges in descending order
+            
+            var output = self
+            
+            for res in results.sorted(by: { $0.range.location > $1.range.location }) {
+                let startIndex = output.index(output.startIndex, offsetBy: res.range.location)
+                let endIndex = output.index(output.startIndex, offsetBy: res.range.location + res.range.length)
+                
+                output.removeSubrange(startIndex..<endIndex)
+            }
+            
+            return output
         #else
             return self
         #endif
