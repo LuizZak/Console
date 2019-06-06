@@ -6,8 +6,6 @@
 //  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
 //
 
-import Cocoa
-
 // This code is based off Vapor's Console library
 //
 // http://github.com/vapor/console
