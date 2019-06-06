@@ -1,5 +1,5 @@
 import XCTest
-import Console
+@testable import Console
 
 class ConsoleMenuControllerTests: ConsoleTestCase {
     func testExitMenu() {
