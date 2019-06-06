@@ -6,6 +6,8 @@
 //  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
 //
 
+import Foundation
+
 // This code is based off Vapor's Console library
 //
 // http://github.com/vapor/console
