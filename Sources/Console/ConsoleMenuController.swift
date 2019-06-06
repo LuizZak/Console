@@ -1,7 +1,4 @@
-#if os(macOS)
-import Darwin.C
-import ObjectiveC
-#endif
+import Foundation
 
 /// Basic class for menu navigation
 open class MenuController {
