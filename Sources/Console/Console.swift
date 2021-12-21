@@ -85,8 +85,10 @@ public enum ValueReadResult<T> {
     case abort
 }
 
-/// Helper console-interation interface
+/// Helper console-interaction interface
 open class Console: ConsoleClient {
+    private let _tputUrl = URL(fileURLWithPath: "/usr/bin/tput")
+
     private var outputSink: OutputSink
     
     private var isInAlternativeBuffer = false
@@ -113,7 +115,7 @@ open class Console: ConsoleClient {
         }
     }
     
-    /// Displays a table-layouted list of values on the console.
+    /// Displays a table layout list of values on the console.
     ///
     /// The value matrix is interpreted as an array of lines, with an inner array
     /// of elements within.
@@ -126,7 +128,7 @@ open class Console: ConsoleClient {
         
         for line in values {
             for (i, cell) in line.enumerated() {
-                // Make sure we have the minimum ammount of storage for storing
+                // Make sure we have the minimum amount of storage for storing
                 // this column
                 while(columnWidths.count <= i) {
                     columnWidths.append(0)
@@ -261,37 +263,45 @@ open class Console: ConsoleClient {
     }
     
     open func startAlternativeScreenBuffer() {
-        #if !Xcode
+        #if Xcode
+        
+        isInAlternativeBuffer = true
+
+        #else
+        
         if isInAlternativeBuffer {
             return
         }
         
-        let process =
-            Process
-                .launchedProcess(launchPath: "/usr/bin/tput",
-                                 arguments: ["smcup"])
+        #if os(Linux) || os(macOS)
         
-        process.waitUntilExit()
+        try? Process.run(_tputUrl, arguments: ["smcup"]).waitUntilExit()
+        
         #endif
         
         isInAlternativeBuffer = true
+
+        #endif
     }
     
     open func stopAlternativeScreenBuffer() {
-        #if !Xcode
+        #if Xcode
+        
+        isInAlternativeBuffer = false
+
+        #else
+
         if !isInAlternativeBuffer {
             return
         }
         
-        let process =
-            Process
-                .launchedProcess(launchPath: "/usr/bin/tput",
-                                 arguments: ["rmcup"])
-        
-        process.waitUntilExit()
+        #if os(Linux) || os(macOS)
+
+        try? Process.run(_tputUrl, arguments: ["rmcup"]).waitUntilExit()
+
         #endif
-        
-        isInAlternativeBuffer = false
+
+        #endif
     }
     
     open func recordExitCode(_ code: Int) {
