@@ -3,8 +3,8 @@ import XCTest
 import Console
 
 public class ConsoleTestCase: XCTestCase {
-    func makeMockConsole(file: String = #file, line: Int = #line) -> MockConsole {
-        return MockConsole(testCase: self, file: file, line: line)
+    func makeMockConsole(file: StaticString = #file, line: UInt = #line) -> MockConsole {
+        return MockConsole(file: file, line: line)
     }
 }
 
@@ -14,15 +14,13 @@ class MockConsole: Console {
         return _buffer.output
     }
     
-    let testCase: XCTestCase
-    let file: String
-    let line: Int
+    let file: StaticString
+    let line: UInt
     
     /// Sequence of mock commands
     var commandsInput: [String?] = []
     
-    init(testCase: XCTestCase, file: String = #file, line: Int = #line) {
-        self.testCase = testCase
+    init(file: StaticString = #file, line: UInt = #line) {
         self.file = file
         self.line = line
         
@@ -36,8 +34,7 @@ class MockConsole: Console {
     override func readLineWith(prompt: String, allowEmpty: Bool = true, validate: (String) -> Bool = { _ in true }) -> String? {
         let res = super.readLineWith(prompt: prompt, allowEmpty: allowEmpty, validate: { input in
             if commandsInput.isEmpty {
-                testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
-                    inFile: file, atLine: line, expected: false)
+                XCTFail("Unexpected readLineWith with prompt: \(prompt)", file: file, line: line)
                 return true
             }
             
@@ -53,8 +50,8 @@ class MockConsole: Console {
     
     override func readSureLineWith(prompt: String) -> String {
         if commandsInput.isEmpty {
-            testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
-                inFile: file, atLine: line, expected: false)
+            XCTFail("Unexpected readLineWith with prompt: \(prompt)",
+                file: file, line: line)
             return "0"
         }
         
@@ -63,8 +60,8 @@ class MockConsole: Console {
     
     override func readLineWith(prompt: String) -> String? {
         if commandsInput.isEmpty {
-            testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
-                inFile: file, atLine: line, expected: false)
+            XCTFail("Unexpected readLineWith with prompt: \(prompt)",
+                file: file, line: line)
             return nil
         }
         
@@ -91,7 +88,7 @@ class MockConsole: Console {
     }
     
     public func beginOutputAssertion() -> MockConsoleOutputAsserter {
-        return MockConsoleOutputAsserter(output: _buffer.output, testCase: testCase)
+        return MockConsoleOutputAsserter(output: _buffer.output)
     }
     
     private class OutputBuffer: TextOutputStream {
@@ -109,14 +106,11 @@ public class MockConsoleOutputAsserter {
     let output: String
     var outputIndex: String.Index
     
-    let testCase: XCTestCase
-    
     var didAssert = false
     
-    init(output: String, testCase: XCTestCase) {
+    init(output: String) {
         self.output = output
         self.outputIndex = output.startIndex
-        self.testCase = testCase
     }
     
     /// Asserts that from the current index, a given string can be found.
@@ -125,7 +119,7 @@ public class MockConsoleOutputAsserter {
     ///
     /// - Parameter string: String to verify on the buffer
     @discardableResult
-    func checkNext(_ string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
+    func checkNext(_ string: String, literal: Bool = true, file: StaticString = #file, line: UInt = #line) -> MockConsoleOutputAsserter {
         if didAssert { // Ignore further asserts since first assert failed.
             return self
         }
@@ -151,7 +145,7 @@ public class MockConsoleOutputAsserter {
     ///
     /// - Parameter string: Input to verify on the buffer
     @discardableResult
-    func checkInputEntered(_ string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
+    func checkInputEntered(_ string: String, literal: Bool = true, file: StaticString = #file, line: UInt = #line) -> MockConsoleOutputAsserter {
         if didAssert { // Ignore further asserts since first assert failed.
             return self
         }
@@ -178,7 +172,7 @@ public class MockConsoleOutputAsserter {
     ///
     /// - Parameter string: String to verify on the buffer
     @discardableResult
-    func checkNextNot(contain string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
+    func checkNextNot(contain string: String, literal: Bool = true, file: StaticString = #file, line: UInt = #line) -> MockConsoleOutputAsserter {
         let range =
             output.range(of: string, options: literal ? .literal : .caseInsensitive,
                          range: outputIndex..<output.endIndex)
@@ -193,7 +187,7 @@ public class MockConsoleOutputAsserter {
     
     /// If the checking asserted, prints the entire output of the buffer being
     /// tested into the standard output for test inspection.
-    func printIfAsserted(file: String = #file, line: Int = #line) {
+    func printIfAsserted(file: StaticString = #file, line: UInt = #line) {
         if didAssert {
             assert(message: output, file: file, line: line)
         }
@@ -206,8 +200,8 @@ public class MockConsoleOutputAsserter {
         }
     }
     
-    private func assert(message: String, file: String, line: Int) {
-        testCase.recordFailure(withDescription: message, inFile: file, atLine: line, expected: false)
+    private func assert(message: String, file: StaticString, line: UInt) {
+        XCTFail(message, file: file, line: line)
         didAssert = true
     }
 }

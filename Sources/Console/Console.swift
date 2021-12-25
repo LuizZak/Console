@@ -263,45 +263,47 @@ open class Console: ConsoleClient {
     }
     
     open func startAlternativeScreenBuffer() {
-        #if Xcode
-        
-        isInAlternativeBuffer = true
-
-        #else
-        
         if isInAlternativeBuffer {
             return
         }
         
-        #if os(Linux) || os(macOS)
-        
-        try? Process.run(_tputUrl, arguments: ["smcup"]).waitUntilExit()
-        
-        #endif
-        
+        try? _runTPut(arguments: ["smcup"])
         isInAlternativeBuffer = true
-
-        #endif
     }
     
     open func stopAlternativeScreenBuffer() {
-        #if Xcode
-        
-        isInAlternativeBuffer = false
-
-        #else
-
         if !isInAlternativeBuffer {
             return
         }
         
-        #if os(Linux) || os(macOS)
+        try? _runTPut(arguments: ["rmcup"])
+        isInAlternativeBuffer = false
+    }
+    
+    private func _runTPut(arguments: [String]) throws {
+        #if !Xcode
+        
+        #if os(Linux)
+        
+        try Process.run(_tputUrl, arguments: arguments).waitUntilExit()
+        
+        #elseif os(macOS)
+        
+        if #available(macOS 10.13, *) {
+            try Process.run(_tputUrl, arguments: arguments).waitUntilExit()
+        } else {
+            let process =
+                Process.launchedProcess(
+                    launchPath: "/usr/bin/tput",
+                    arguments: arguments
+                )
 
-        try? Process.run(_tputUrl, arguments: ["rmcup"]).waitUntilExit()
-
-        #endif
-
-        #endif
+            process.waitUntilExit()
+        }
+        
+        #endif // os(Linux)
+        
+        #endif // !Xcode
     }
     
     open func recordExitCode(_ code: Int) {
