@@ -4,13 +4,13 @@ import Foundation
 open class MenuController {
     
     /// Console client to interact with
-    public let console: ConsoleClientType
+    public let console: ConsoleType
     
     /// Current menu under construction.
     /// Used only during `initMenus()`.
     var currentBuildingMenu: MenuItem?
     
-    public init(console: ConsoleClientType) {
+    public init(console: ConsoleType) {
         self.console = console
     }
     
@@ -105,7 +105,10 @@ open class MenuController {
                     console.recordExitCode(0)
                     return .quit
                 case (1...menu.actions.count):
-                    performAction(action: menu.actions[option - 1].action, parents: parents + [menu])
+                    performAction(
+                        action: menu.actions[option - 1].action,
+                        parents: parents + [menu]
+                    )
                 default:
                     message = "Invalid option \(input)"
                 }
@@ -120,23 +123,33 @@ open class MenuController {
     }
     
     @discardableResult
-    public func createMenu(name: String,
-                           initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void) -> MenuItem {
+    public func createMenu(
+        name: String,
+        initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void
+    ) -> MenuItem {
         
         let menu = currentBuildingMenu
         defer {
             currentBuildingMenu = menu
         }
         var acts = currentBuildingMenu?.actions
-        let m = createMenu(name: name, targetActions: &acts, initializer: { currentBuildingMenu = $1; initializer($0, &$1) })
+        let m = createMenu(
+            name: name,
+            targetActions: &acts,
+            initializer: {
+                currentBuildingMenu = $1; initializer($0, &$1)
+            }
+        )
         menu?.actions = acts ?? []
         return m
     }
     
-    public func createMenu(name: String,
-                           targetActions: inout [(title: String, action: Action)]?,
-                           initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void) -> MenuItem {
-        
+    public func createMenu(
+        name: String,
+        targetActions: inout [(title: String, action: Action)]?,
+        initializer: (_ controller: MenuController, _ item: inout MenuItem) -> Void
+    ) -> MenuItem {
+
         var item = MenuItem(name: name, actions: [])
         targetActions?.append((name, .subMenu(menu: item)))
         initializer(self, &item)
@@ -162,7 +175,11 @@ open class MenuController {
         /// firing only when displaying the menu from above.
         public var initAction: Action?
         
-        public init(name: String, actions: [(String, Action)] = [], initAction: Action? = nil) {
+        public init(
+            name: String,
+            actions: [(String, Action)] = [],
+            initAction: Action? = nil
+        ) {
             self.name = name
             self.actions = actions
         }

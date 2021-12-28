@@ -1,5 +1,5 @@
 /// A publicly-facing protocol for console clients
-public protocol ConsoleClientType {
+public protocol ConsoleType {
     /// Displays an items table on the console.
     func displayTable(withValues values: [[String]], separator: String)
     
@@ -35,7 +35,8 @@ public protocol ConsoleClientType {
     ///   - prompt: Textual prompt to present to the user
     ///   - allowEmpty: Whether the method allows empty inputs - empty inputs
     /// finish the console input and return `nil`.
-    ///   - parse: A parsing method that parses the user's input string and returns it.
+    ///   - parse: A parsing method that parses the user's input string and returns
+    /// a result.
     /// - Returns: First input value that was correctly parsed, or if `allowEmpty` is
     /// `true`, nil, if the user specified no input.
     func parseLineWith<T>(prompt: String, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T?

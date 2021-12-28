@@ -4,22 +4,23 @@ import Foundation
 /// to perform specific actions on items, as well.
 public class Pages {
     
-    var console: Console
+    var console: ConsoleType
     var configuration: PageDisplayConfiguration?
     
-    public init(console: Console, configuration: PageDisplayConfiguration? = nil) {
+    public init(console: ConsoleType, configuration: PageDisplayConfiguration? = nil) {
         self.console = console
         self.configuration = configuration
     }
     
     /// Displays a sequence of items as a paged list of items, which the user 
-    /// can interacy by selecting the page to display.
+    /// can interact with by selecting the page to display.
     /// The data is understood as a sequence of columns.
     /// The function also supports a special command closure that interprets 
     /// lines started with '=' with a special closure
-    public func displayPages(withProvider provider: ConsoleDataProvider,
-                             perPageCount: Int = 30) {
-        
+    public func displayPages(
+        withProvider provider: ConsoleDataProvider,
+        perPageCount: Int = 30
+    ) {
         var page = 0
         var pageCount = max(1, Int(ceil(Float(provider.count) / Float(perPageCount))))
         

@@ -27,8 +27,16 @@ public class MockConsole: Console {
         commandsInput.append(line)
     }
     
-    public override func readLineWith(prompt: String, allowEmpty: Bool = true, validate: (String) -> Bool = { _ in true }) -> String? {
-        let res = super.readLineWith(prompt: prompt, allowEmpty: allowEmpty, validate: { input in
+    public override func readLineWith(
+        prompt: String,
+        allowEmpty: Bool = true,
+        validate: (String) -> Bool = { _ in true }
+    ) -> String? {
+
+        let res = super.readLineWith(
+            prompt: prompt,
+            allowEmpty: allowEmpty
+        ) { input in
             if commandsInput.isEmpty {
                 testAdapter.recordTestFailure(
                     "Unexpected readLineWith with prompt: \(prompt)",
@@ -40,7 +48,7 @@ public class MockConsole: Console {
             }
             
             return validate(input)
-        })
+        }
         
         if commandsInput.isEmpty {
             return "0"
@@ -131,7 +139,13 @@ public class MockConsoleOutputAsserter {
     ///
     /// - Parameter string: String to verify on the buffer
     @discardableResult
-    public func checkNext(_ string: String, literal: Bool = true, file: StaticString = #file, line: UInt = #line) -> MockConsoleOutputAsserter {
+    public func checkNext(
+        _ string: String,
+        literal: Bool = true,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> MockConsoleOutputAsserter {
+
         if didAssert { // Ignore further asserts since first assert failed.
             return self
         }
@@ -160,7 +174,13 @@ public class MockConsoleOutputAsserter {
     ///
     /// - Parameter string: Input to verify on the buffer
     @discardableResult
-    public func checkInputEntered(_ string: String, literal: Bool = true, file: StaticString = #file, line: UInt = #line) -> MockConsoleOutputAsserter {
+    public func checkInputEntered(
+        _ string: String,
+        literal: Bool = true,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> MockConsoleOutputAsserter {
+
         if didAssert { // Ignore further asserts since first assert failed.
             return self
         }
@@ -187,7 +207,13 @@ public class MockConsoleOutputAsserter {
     ///
     /// - Parameter string: String to verify on the buffer
     @discardableResult
-    public func checkNextNot(contain string: String, literal: Bool = true, file: StaticString = #file, line: UInt = #line) -> MockConsoleOutputAsserter {
+    public func checkNextNot(
+        contain string: String,
+        literal: Bool = true,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> MockConsoleOutputAsserter {
+
         let range =
             output.range(of: string, options: literal ? .literal : .caseInsensitive,
                          range: outputIndex..<output.endIndex)

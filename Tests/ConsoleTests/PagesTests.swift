@@ -180,10 +180,14 @@ class PagesTests: ConsoleTestCase {
         mock.addMockInput(line: "0")
         
         let sut =
-            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
+            makePagesTestMenu(
+                console: mock,
+                items: pageItems,
+                perPageCount: 2
+            ) { _ in
                 XCTFail("Did not expect to invoke command handler")
                 return .quit("Issued command")
-            })
+            }
         
         sut.main()
         
@@ -300,10 +304,7 @@ class PagesTests: ConsoleTestCase {
         mock.addMockInput(line: "0")
         
         let sut =
-            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
-                XCTFail("Did not expect to invoke command handler")
-                return .quit("Issued command")
-            })
+            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: )
         
         sut.main()
         
@@ -353,11 +354,14 @@ class PagesTests: ConsoleTestCase {
         mock.addMockInput(line: "0")
         
         let sut =
-            makePagesTestMenu(console: mock,
-                              items: pageItems,
-                              perPageCount: 3,
-                              canHandleEmptyInput: true,
-                              command: { input in mock.printLine("Received '\(input)'"); return .loop(nil) })
+            makePagesTestMenu(
+                console: mock,
+                items: pageItems,
+                perPageCount: 3,
+                canHandleEmptyInput: true
+            ) { input in
+                mock.printLine("Received '\(input)'"); return .loop(nil)
+            }
         
         sut.main()
         
@@ -399,14 +403,15 @@ class PagesTests: ConsoleTestCase {
             makePagesTestMenu(
                 console: mock,
                 items: pageItems,
-                perPageCount: 3) { _ -> Pages.PagesCommandResult in
-                    return .modifyList(keepPageIndex: false) {
-                        _ in ArrayConsoleDataProvider(header: "Another list of things",
-                                                      items: ["Other item 1",
-                                                              "Other item 2",
-                                                              "Other item 3"])
-                    }
+                perPageCount: 3
+            ) { _ -> Pages.PagesCommandResult in
+                return .modifyList(keepPageIndex: false) {
+                    _ in ArrayConsoleDataProvider(header: "Another list of things",
+                                                    items: ["Other item 1",
+                                                            "Other item 2",
+                                                            "Other item 3"])
                 }
+            }
         
         sut.main()
         
@@ -434,68 +439,85 @@ class PagesTests: ConsoleTestCase {
 }
 
 extension PagesTests {
-    func makePagesTestMenu(console: ConsoleClientType,
-                           items: [String],
-                           perPageCount: Int) -> TestMenuController {
-        
+    func makePagesTestMenu(
+        console: ConsoleType,
+        items: [String],
+        perPageCount: Int
+    ) -> TestMenuController {
         return makePagesTestMenu(console: console) { menu in
             let pages = menu.console.makePages()
             
-            pages.displayPages(withValues: items,
-                               header: "A list of things",
-                               perPageCount: perPageCount)
+            pages.displayPages(
+                withValues: items,
+                header: "A list of things",
+                perPageCount: perPageCount
+            )
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClientType,
-                           rows: [[String]],
-                           perPageCount: Int) -> TestMenuController {
-        
+    func makePagesTestMenu(
+        console: ConsoleType,
+        rows: [[String]],
+        perPageCount: Int
+    ) -> TestMenuController {
         return makePagesTestMenu(console: console) { menu in
             let pages = menu.console.makePages()
             
-            pages.displayPages(withRows: rows,
-                               header: "A list of things",
-                               perPageCount: perPageCount)
+            pages.displayPages(
+                withRows: rows,
+                header: "A list of things",
+                perPageCount: perPageCount
+            )
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClientType,
-                           items: [String],
-                           perPageCount: Int,
-                           canHandleEmptyInput: Bool = false,
-                           command: @escaping (String) throws -> Pages.PagesCommandResult) -> TestMenuController {
-        
+    func makePagesTestMenu(
+        console: ConsoleType,
+        items: [String],
+        perPageCount: Int,
+        canHandleEmptyInput: Bool = false,
+        command: @escaping (String) throws -> Pages.PagesCommandResult
+    ) -> TestMenuController {
         let configuration =
-            Pages.PageDisplayConfiguration(commandPrompt: nil,
-                                           canHandleEmptyInput: canHandleEmptyInput,
-                                           commandClosure: command)
+            Pages.PageDisplayConfiguration(
+                commandPrompt: nil,
+                canHandleEmptyInput: canHandleEmptyInput,
+                commandClosure: command
+            )
         
         return makePagesTestMenu(console: console) { menu in
             let pages = menu.console.makePages(configuration: configuration)
             
-            pages.displayPages(withValues: items,
-                               header: "A list of things",
-                               perPageCount: perPageCount)
+            pages.displayPages(
+                withValues: items,
+                header: "A list of things",
+                perPageCount: perPageCount
+            )
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClientType,
-                           items: [String],
-                           perPageCount: Int,
-                           command: PagesCommandHandler) -> TestMenuController {
-        
+    func makePagesTestMenu(
+        console: ConsoleType,
+        items: [String],
+        perPageCount: Int,
+        command: PagesCommandHandler
+    ) -> TestMenuController {
         return makePagesTestMenu(console: console) { menu in
             let config = Pages.PageDisplayConfiguration(commandHandler: command)
             let pages = menu.console.makePages(configuration: config)
             
-            pages.displayPages(withValues: items,
-                               header: "A list of things",
-                               perPageCount: perPageCount)
+            pages.displayPages(
+                withValues: items,
+                header: "A list of things",
+                perPageCount: perPageCount
+            )
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClientType, with closure: @escaping (MenuController) -> ()) -> TestMenuController {
+    func makePagesTestMenu(
+        console: ConsoleType,
+        with closure: @escaping (MenuController) -> ()
+    ) -> TestMenuController {
         let menu = TestMenuController(console: console)
         menu.builder = { menu in
             menu.createMenu(name: "Menu") { (menu, _) in

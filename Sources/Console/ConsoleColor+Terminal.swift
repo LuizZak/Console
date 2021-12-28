@@ -36,7 +36,12 @@ extension String {
                 return self
             }
             
-            let results = regex.matches(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count))
+            let results = regex
+                .matches(
+                    in: self,
+                    options: [],
+                    range: NSRange(location: 0, length: self.utf16.count)
+                )
             //let removed = results.reduce(0) { $0 + $1.range.length }
             
             // Remove ranges in descending order
@@ -44,8 +49,14 @@ extension String {
             var output = self
             
             for res in results.sorted(by: { $0.range.location > $1.range.location }) {
-                let startIndex = output.index(output.startIndex, offsetBy: res.range.location)
-                let endIndex = output.index(output.startIndex, offsetBy: res.range.location + res.range.length)
+                let startIndex = output.index(
+                    output.startIndex,
+                    offsetBy: res.range.location
+                )
+                let endIndex = output.index(
+                    output.startIndex,
+                    offsetBy: res.range.location + res.range.length
+                )
                 
                 output.removeSubrange(startIndex..<endIndex)
             }

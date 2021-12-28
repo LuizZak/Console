@@ -7,7 +7,7 @@ public enum ValueReadResult<T> {
 }
 
 /// Helper console-interaction interface
-open class Console: ConsoleClientType {
+open class Console: ConsoleType {
     private let _tputUrl = URL(fileURLWithPath: "/usr/bin/tput")
 
     private var outputSink: OutputSink
@@ -51,7 +51,7 @@ open class Console: ConsoleClientType {
             for (i, cell) in line.enumerated() {
                 // Make sure we have the minimum amount of storage for storing
                 // this column
-                while(columnWidths.count <= i) {
+                while columnWidths.count <= i {
                     columnWidths.append(0)
                 }
                 
@@ -62,7 +62,7 @@ open class Console: ConsoleClientType {
         // Print columns now
         for line in values {
             for (i, row) in line.enumerated() {
-                if(i < line.count - 1) {
+                if i < line.count - 1 {
                     let rowLength = Console.measureString(row)
                     let spaces = String(repeating: " ", count: columnWidths[i] - rowLength)
                     
@@ -86,10 +86,11 @@ open class Console: ConsoleClientType {
         } while true
     }
     
-    open func readLineWith(prompt: String,
-                           allowEmpty: Bool = true,
-                           validate: (String) -> Bool = { _ in true }) -> String? {
-        
+    open func readLineWith(
+        prompt: String,
+        allowEmpty: Bool = true,
+        validate: (String) -> Bool = { _ in true }
+    ) -> String? {
         repeat {
             let input = readSureLineWith(prompt: prompt)
             
@@ -105,10 +106,11 @@ open class Console: ConsoleClientType {
         } while true
     }
 
-    open func parseLineWith<T>(prompt: String,
-                               allowEmpty: Bool,
-                               parse: (String) -> ValueReadResult<T>) -> T? {
-        
+    open func parseLineWith<T>(
+        prompt: String,
+        allowEmpty: Bool,
+        parse: (String) -> ValueReadResult<T>
+    ) -> T? {
         repeat {
             let input = readSureLineWith(prompt: prompt)
             
@@ -132,7 +134,10 @@ open class Console: ConsoleClientType {
         } while true
     }
     
-    open func readIntWith(prompt: String, validate: (Int) -> Bool = { _ in true }) -> Int? {
+    open func readIntWith(
+        prompt: String,
+        validate: (Int) -> Bool = { _ in true }
+    ) -> Int? {
         repeat {
             let input = readSureLineWith(prompt: prompt)
             
