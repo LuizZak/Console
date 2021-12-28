@@ -215,10 +215,14 @@ class PagesTests: ConsoleTestCase {
         mock.addMockInput(line: "0")
         
         let sut =
-            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
+            makePagesTestMenu(
+                console: mock,
+                items: pageItems,
+                perPageCount: 2
+            ) { _ in
                 XCTFail("Did not expect to invoke command handler")
                 return .quit("Issued command")
-            })
+            }
         
         sut.main()
         
@@ -248,10 +252,14 @@ class PagesTests: ConsoleTestCase {
         mock.addMockInput(line: "0")
         
         let sut =
-            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
+            makePagesTestMenu(
+                console: mock,
+                items: pageItems,
+                perPageCount: 2
+            ) { _ in
                 XCTFail("Did not expect to invoke command handler")
                 return .quit("Issued command")
-            })
+            }
         
         sut.main()
         
@@ -304,7 +312,14 @@ class PagesTests: ConsoleTestCase {
         mock.addMockInput(line: "0")
         
         let sut =
-            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: )
+            makePagesTestMenu(
+                console: mock,
+                items: pageItems,
+                perPageCount: 2
+            ) { _ in
+                XCTFail("Did not expect to invoke command handler")
+                return .quit("Issued command")
+            }
         
         sut.main()
         
@@ -405,11 +420,15 @@ class PagesTests: ConsoleTestCase {
                 items: pageItems,
                 perPageCount: 3
             ) { _ -> Pages.PagesCommandResult in
-                return .modifyList(keepPageIndex: false) {
-                    _ in ArrayConsoleDataProvider(header: "Another list of things",
-                                                    items: ["Other item 1",
-                                                            "Other item 2",
-                                                            "Other item 3"])
+                .modifyList(keepPageIndex: false) { _ in
+                    ArrayConsoleDataProvider(
+                        header: "Another list of things",
+                        items: [
+                            "Other item 1",
+                            "Other item 2",
+                            "Other item 3",
+                        ]
+                    )
                 }
             }
         
