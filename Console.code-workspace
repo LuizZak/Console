@@ -1,0 +1,187 @@
+{
+	"tasks": {
+		"version": "2.0.0",
+		"problemMatcher": [
+			// Compilation
+			{
+				"owner": "swift",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"message": 5,
+				},
+			},
+			// Fix to detect unit test executions, which do not feature a column during reporting
+			{
+				"owner": "swift",
+				"fileLocation": "autoDetect",
+				"pattern": {
+					"regexp": "^(.*):(\\d+):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"severity": 3,
+					"message": 4,
+				},
+			},
+		],
+		"tasks": [
+            {
+				"label": "Build (debug)",
+				"type": "swift",
+				"command": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"args": [
+					"build",
+					"--build-tests",
+					"--enable-code-coverage",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
+				],
+				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
+			},
+            {
+				"label": "Build (release)",
+				"type": "swift",
+				"command": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"args": [
+					"build",
+					"-c=release",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
+					"-Xswiftc",
+					"-cross-module-optimization"
+				],
+				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
+			},
+            {
+				"label": "Test",
+				"type": "shell",
+				"command": "swift",
+				"group": {
+					"kind": "test",
+					"isDefault": true
+				},
+				"args": [
+					"test",
+					"--enable-code-coverage",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
+				],
+			},
+		],
+	},
+	"folders": [
+		{
+			"path": ".",
+            "name": "Console",
+		},
+		{
+			"name": "Swift Package Dependencies",
+			"path": ".build/checkouts",
+		},
+		{
+			"name": "Build",
+			"path": ".build/debug/..",
+		},
+	],
+	"launch": {
+		"inputs": [
+			{
+				"id": "test_filter",
+				"type": "promptString",
+				"description": "Filter to pass to swift test --filter"
+			}
+		],
+		"configurations": [
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test Console",
+				"program": "./.build/debug/ConsolePackageTests.xctest",
+				"cwd": "${workspaceFolder:Console}",
+				"preLaunchTask": "Build (debug)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test Console (filtered)",
+				"program": "./.build/debug/ConsolePackageTests.xctest",
+				"args": [
+					"${input:test_filter}"
+				],
+				"cwd": "${workspaceFolder:Console}",
+				"preLaunchTask": "Build (debug)",
+			}
+		]
+	},
+	"settings": {
+		"files.eol": "\n",
+		"files.insertFinalNewline": true,
+		"files.exclude": {
+			".git": true,
+			".build": true,
+			".*.sw?": true,
+			"**/.DS_Store": true,
+		},
+		"commentAnchors.workspace.excludeFiles": "**/{node_modules,.git,.idea,target,out,build,vendor,.build,.swiftpm}/**/*",
+		"commentAnchors.tags.list": [
+			{
+				"tag": "MARK",
+				"iconColor": "default",
+				"highlightColor": "#A8C023",
+				"scope": "file"
+			},
+			{
+				"tag": "TODO",
+				"iconColor": "blue",
+				"highlightColor": "#3ea8ff",
+				"scope": "workspace"
+			},
+			{
+				"tag": "FIXME",
+				"iconColor": "red",
+				"highlightColor": "#F44336",
+				"scope": "workspace"
+			},
+			{
+				"tag": "NOTE",
+				"iconColor": "orange",
+				"highlightColor": "#FFB300",
+				"scope": "file"
+			},
+		],
+		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
+		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
+		"cSpell.words": [
+			
+		],
+		"swiftTest.swift.testParams": [
+			"--enable-code-coverage",
+		],
+		"lldb.library": "/home/luiz/swift-5.5.2-RELEASE-ubuntu20.04/usr/lib/liblldb.so",
+	},
+	"extensions": {
+		"recommendations": [
+			"exodiusstudios.comment-anchors",
+			"makeitbetter.vscode-swift-test-adapter",
+			"vknabel.swift-coverage",
+		],
+	},
+}

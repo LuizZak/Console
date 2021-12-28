@@ -168,12 +168,12 @@ class TestMenuController: MenuController {
     var onDeinit: () -> ()
     var builder: ((MenuController) -> (MenuController.MenuItem))?
     
-    override init(console: ConsoleClient) {
+    override init(console: ConsoleClientType) {
         self.onDeinit = { () in }
         super.init(console: console)
     }
     
-    init(console: ConsoleClient, onDeinit: @escaping () -> () = { }) {
+    init(console: ConsoleClientType, onDeinit: @escaping () -> () = { }) {
         self.onDeinit = onDeinit
         super.init(console: console)
     }

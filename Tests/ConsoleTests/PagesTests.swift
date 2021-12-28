@@ -434,7 +434,7 @@ class PagesTests: ConsoleTestCase {
 }
 
 extension PagesTests {
-    func makePagesTestMenu(console: ConsoleClient,
+    func makePagesTestMenu(console: ConsoleClientType,
                            items: [String],
                            perPageCount: Int) -> TestMenuController {
         
@@ -447,7 +447,7 @@ extension PagesTests {
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClient,
+    func makePagesTestMenu(console: ConsoleClientType,
                            rows: [[String]],
                            perPageCount: Int) -> TestMenuController {
         
@@ -460,7 +460,7 @@ extension PagesTests {
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClient,
+    func makePagesTestMenu(console: ConsoleClientType,
                            items: [String],
                            perPageCount: Int,
                            canHandleEmptyInput: Bool = false,
@@ -480,7 +480,7 @@ extension PagesTests {
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClient,
+    func makePagesTestMenu(console: ConsoleClientType,
                            items: [String],
                            perPageCount: Int,
                            command: PagesCommandHandler) -> TestMenuController {
@@ -495,7 +495,7 @@ extension PagesTests {
         }
     }
     
-    func makePagesTestMenu(console: ConsoleClient, with closure: @escaping (MenuController) -> ()) -> TestMenuController {
+    func makePagesTestMenu(console: ConsoleClientType, with closure: @escaping (MenuController) -> ()) -> TestMenuController {
         let menu = TestMenuController(console: console)
         menu.builder = { menu in
             menu.createMenu(name: "Menu") { (menu, _) in

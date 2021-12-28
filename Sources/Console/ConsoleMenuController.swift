@@ -4,13 +4,13 @@ import Foundation
 open class MenuController {
     
     /// Console client to interact with
-    public let console: ConsoleClient
+    public let console: ConsoleClientType
     
     /// Current menu under construction.
     /// Used only during `initMenus()`.
     var currentBuildingMenu: MenuItem?
     
-    public init(console: ConsoleClient) {
+    public init(console: ConsoleClientType) {
         self.console = console
     }
     
