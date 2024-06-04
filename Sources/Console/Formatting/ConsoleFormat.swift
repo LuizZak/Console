@@ -16,6 +16,8 @@ public enum ConsoleFormat: UInt8 {
     case underline = 4
 
     /// Converts this console format command into an ANSI escape command.
+    ///
+    /// Returns `"\e[\(self)m"`
     public var ansi: String {
         rawValue.ansi
     }

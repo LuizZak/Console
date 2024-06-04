@@ -13,11 +13,11 @@ public enum ConsoleColor {
     case magenta
     case cyan
     case white
+    case `default`
 }
 
 extension ConsoleColor {
-    /// Returns the foreground terminal color
-    /// code for the ConsoleColor.
+    /// Returns the foreground terminal color code for the `ConsoleColor`.
     public var terminalForeground: UInt8 {
         switch self {
         case .black:
@@ -36,11 +36,12 @@ extension ConsoleColor {
             return 36
         case .white:
             return 37
+        case .default:
+            return 39
         }
     }
 
-    /// Returns the background terminal color
-    /// code for the ConsoleColor.
+    /// Returns the background terminal color code for the `ConsoleColor`.
     public var terminalBackground: UInt8 {
         switch self {
         case .black:
@@ -59,6 +60,8 @@ extension ConsoleColor {
             return 46
         case .white:
             return 47
+        case .default:
+            return 49
         }
     }
 }
