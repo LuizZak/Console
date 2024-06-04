@@ -40,6 +40,14 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
             case .formatSet(let format):
                 current = format
                 result += current.ansi
+
+            case .consoleString(let value):
+                result += value.terminalFormatted(
+                    background: current.background,
+                    foreground: current.foreground,
+                    format: current.format
+                )
+                result += current.ansi
             }
         }
 
@@ -58,6 +66,9 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
 
             case .formatted(let value, _):
                 result += value
+
+            case .consoleString(let value):
+                result += value.unformatted()
 
             case .formatSet:
                 break
@@ -79,6 +90,9 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
         /// A non-content segment that indicates a change of the formatting
         /// for the remainder of the string.
         case formatSet(SegmentFormatting)
+
+        /// A nested console string segment.
+        case consoleString(ConsoleString)
     }
 
     /// Holds formatting information about a console string's segment.
@@ -146,6 +160,11 @@ extension ConsoleString {
         /// value.
         public mutating func appendInterpolation(_ value: any CustomStringConvertible) {
             appendLiteral(value.description)
+        }
+
+        /// Appends a console string as an interpolation into this string.
+        public mutating func appendInterpolation(formatted: ConsoleString) {
+            segments.append(.consoleString(formatted))
         }
 
         /// Appends a formatted interpolation of a given string-convertible
