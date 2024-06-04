@@ -38,12 +38,9 @@ extension String {
                     options: [],
                     range: NSRange(location: 0, length: self.utf16.count)
                 )
-            //let removed = results.reduce(0) { $0 + $1.range.length }
 
             // Remove ranges in descending order
-
             var output = self
-
             for res in results.sorted(by: { $0.range.location > $1.range.location }) {
                 let startIndex = output.index(
                     output.startIndex,

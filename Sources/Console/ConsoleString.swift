@@ -12,6 +12,11 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
         self.segments = stringInterpolation.segments
     }
 
+    /// Initializes a console string with a given set of segments.
+    public init(segments: [Segment]) {
+        self.segments = segments
+    }
+
     /// Returns a string that contains the ANSI escape sequences for formatting
     /// the segments of this console string, with a set of default background,
     /// foreground, and format settings for the base text.
@@ -56,6 +61,9 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
 
     /// Returns a string that contains the raw string literals without extra
     /// terminal formatting ANSI escape sequences added in.
+    ///
+    /// - note: If literal string segments themselves contain ANSI escape sequences,
+    /// the method still returns them as-is.
     public func unformatted() -> String {
         var result = ""
 
@@ -208,5 +216,41 @@ extension ConsoleString {
 
             segments.append(.formatSet(format))
         }
+    }
+}
+
+// MARK: - Operators
+
+public extension ConsoleString {
+    /// Concatenates two console string values, returning a single console string
+    /// containing both of the string's segments in sequence.
+    static func + (lhs: Self, rhs: Self) -> Self {
+        .init(segments: lhs.segments + rhs.segments)
+    }
+
+    /// Concatenates a string literal and a console string value, returning a
+    /// single console string containing both of the string's segments in
+    /// sequence.
+    static func + (lhs: String, rhs: Self) -> Self {
+        .init(segments: [.literal(lhs)] + rhs.segments)
+    }
+
+    /// Concatenates a console string and a string literal value, returning a
+    /// single console string containing both of the string's segments in
+    /// sequence.
+    static func + (lhs: Self, rhs: String) -> Self {
+        .init(segments: lhs.segments + [.literal(rhs)])
+    }
+
+    /// Concatenates two console string values into `lhs`, assigning it a console
+    /// string containing both of the string's segments in sequence.
+    static func += (lhs: inout Self, rhs: Self) {
+        lhs = lhs + rhs
+    }
+
+    /// Concatenates a string segment into a console string, assigning it a console
+    /// string containing both of the string's segments in sequence.
+    static func += (lhs: inout Self, rhs: String) {
+        lhs = lhs + rhs
     }
 }
