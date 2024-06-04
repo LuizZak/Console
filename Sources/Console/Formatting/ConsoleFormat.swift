@@ -22,9 +22,9 @@ public enum ConsoleFormat: UInt8 {
 }
 
 extension UInt8 {
-    /**
-     Converts a UInt8 to an ANSI code.
-     */
+    /// Converts a UInt8 to an ANSI code.
+    ///
+    /// Returns `"\e[\(self)m"`
     public var ansi: String {
         return (self.description + "m").ansi
     }

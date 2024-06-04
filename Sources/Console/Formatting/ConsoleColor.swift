@@ -3,9 +3,7 @@
 // http://github.com/vapor/console
 //
 
-/**
- Underlying colors for console styles.
- */
+/// Underlying colors for console styles.
 public enum ConsoleColor {
     case black
     case red
@@ -18,10 +16,8 @@ public enum ConsoleColor {
 }
 
 extension ConsoleColor {
-    /**
-     Returns the foreground terminal color
-     code for the ConsoleColor.
-     */
+    /// Returns the foreground terminal color
+    /// code for the ConsoleColor.
     public var terminalForeground: UInt8 {
         switch self {
         case .black:
@@ -42,11 +38,9 @@ extension ConsoleColor {
             return 37
         }
     }
-    
-    /**
-     Returns the background terminal color
-     code for the ConsoleColor.
-     */
+
+    /// Returns the background terminal color
+    /// code for the ConsoleColor.
     public var terminalBackground: UInt8 {
         switch self {
         case .black:

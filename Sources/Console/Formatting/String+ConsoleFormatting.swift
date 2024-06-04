@@ -16,10 +16,7 @@ extension String {
         #endif
     }
 
-    /**
-     Wraps a string in the color indicated
-     by the UInt8 terminal color code.
-     */
+    /// Wraps a string in the color indicated by the UInt8 terminal color code.
     public func terminalColorize(_ color: ConsoleColor) -> String {
         #if !Xcode
             return color.terminalForeground.ansi + self + UInt8(0).ansi
@@ -34,7 +31,7 @@ extension String {
             guard let regex = try? NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]", options: []) else {
                 return self
             }
-            
+
             let results = regex
                 .matches(
                     in: self,
@@ -42,11 +39,11 @@ extension String {
                     range: NSRange(location: 0, length: self.utf16.count)
                 )
             //let removed = results.reduce(0) { $0 + $1.range.length }
-            
+
             // Remove ranges in descending order
-            
+
             var output = self
-            
+
             for res in results.sorted(by: { $0.range.location > $1.range.location }) {
                 let startIndex = output.index(
                     output.startIndex,
@@ -56,19 +53,17 @@ extension String {
                     output.startIndex,
                     offsetBy: res.range.location + res.range.length
                 )
-                
+
                 output.removeSubrange(startIndex..<endIndex)
             }
-            
+
             return output
         #else
             return self
         #endif
     }
-    
-    /**
-     Strips this entire string of terminal color commands
-     */
+
+    /// Strips this entire string of terminal color commands
     @available(*, renamed: "stripTerminalFormatting()")
     public func stripTerminalColors() -> String {
         stripTerminalFormatting()
@@ -76,9 +71,9 @@ extension String {
 }
 
 extension String {
-    /**
-     Converts a String to a full ANSI command.
-     */
+    /// Converts a String to a full ANSI command.
+    ///
+    /// Returns `"\e[\(self)"`
     public var ansi: String {
         return "\u{001B}[" + self
     }
