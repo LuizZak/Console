@@ -15,7 +15,7 @@ open class Console: ConsoleType {
     private var isInAlternativeBuffer = false
 
     /// Target output stream to print messages to
-    public final var output: TextOutputStream
+    public final var output: ConsoleOutputStream
 
     /// If true, erases scrollback when calling `eraseScreen`.
     /// Defaults to true.
@@ -27,7 +27,7 @@ open class Console: ConsoleType {
     }
 
     /// Initializes this console class with a custom output stream
-    public init(output: TextOutputStream) {
+    public init(output: ConsoleOutputStream) {
         self.output = output
         outputSink = OutputSink(forward: { _ in })
 
@@ -175,9 +175,9 @@ open class Console: ConsoleType {
     }
 
     open func command(_ command: Terminal.Command) {
-        #if !Xcode
-        printLine(command.ansi, terminator: "")
-        #endif
+        if output.capabilityFlags.contains(.ansiControlSequences) {
+            printLine(command.ansi, terminator: "")
+        }
     }
 
     open func clearScreen() {
@@ -244,13 +244,19 @@ open class Console: ConsoleType {
         return Pages(console: self, configuration: configuration)
     }
 
-    /// Measures the number of visible characters for a given string input
+    /// Measures the number of visible characters for a given console string input.
+    static func measureString(_ consoleString: ConsoleString) -> Int {
+        consoleString.unformatted().count
+    }
+
+    /// Measures the number of visible characters for a given console string input.
     static func measureString(_ string: String) -> Int {
         do {
             // Regex to ignore ASCII coloring from string
-            let regex =
-                try NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]",
-                                        options: [])
+            let regex = try NSRegularExpression(
+                pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]",
+                options: []
+            )
 
             let range = NSRange(location: 0, length: (string as NSString).length)
 
@@ -291,7 +297,15 @@ open class Console: ConsoleType {
 }
 
 /// Standard output text stream
-public class StandardOutputTextStream: TextOutputStream {
+public class StandardOutputTextStream: ConsoleOutputStream {
+    public var capabilityFlags: ConsoleOutputCapabilityFlag {
+        #if Xcode
+            return []
+        #else
+            return [.ansiControlSequences]
+        #endif
+    }
+
     public func write(_ string: String) {
         print(string, separator: "", terminator: "")
     }
