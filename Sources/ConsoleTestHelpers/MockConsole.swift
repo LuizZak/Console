@@ -28,7 +28,7 @@ public class MockConsole: Console {
     }
 
     public override func readLineWith(
-        prompt: String,
+        prompt: ConsoleString,
         allowEmpty: Bool = true,
         validate: (String) -> Bool = { _ in true }
     ) -> String? {
@@ -57,7 +57,7 @@ public class MockConsole: Console {
         return res
     }
 
-    public override func readSureLineWith(prompt: String) -> String {
+    public override func readSureLineWith(prompt: ConsoleString) -> String {
         if commandsInput.isEmpty {
             testAdapter.recordTestFailure(
                 "Unexpected readLineWith with prompt: \(prompt)",
@@ -71,7 +71,7 @@ public class MockConsole: Console {
         return super.readSureLineWith(prompt: prompt)
     }
 
-    public override func readLineWith(prompt: String) -> String? {
+    public override func readLineWith(prompt: ConsoleString) -> String? {
         if commandsInput.isEmpty {
             testAdapter.recordTestFailure(
                 "Unexpected readLineWith with prompt: \(prompt)",
@@ -105,15 +105,16 @@ public class MockConsole: Console {
     }
 
     public func beginOutputAssertion() -> MockConsoleOutputAsserter {
-        return MockConsoleOutputAsserter(testAdapter: testAdapter, output: _buffer.output)
+        return MockConsoleOutputAsserter(
+            testAdapter: testAdapter,
+            output: _buffer.output
+        )
     }
 
     private class OutputBuffer: ConsoleOutputStream {
         var output = ""
 
-        var capabilityFlags: ConsoleOutputCapabilityFlag = [
-            .ansiControlSequences
-        ]
+        var capabilityFlags: ConsoleOutputCapabilityFlag = []
 
         func write(_ string: String) {
             output += string

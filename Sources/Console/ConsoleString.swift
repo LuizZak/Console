@@ -12,6 +12,14 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
         self.segments = stringInterpolation.segments
     }
 
+    /// Initializes this console string with a string, stripping it of ANSI
+    /// escape sequences in the process.
+    public init(stripping string: String) {
+        self.segments = [
+            .literal(string.stripTerminalFormatting())
+        ]
+    }
+
     /// Initializes a console string with a given set of segments.
     public init(segments: [Segment]) {
         self.segments = segments

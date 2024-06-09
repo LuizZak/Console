@@ -43,7 +43,7 @@ open class Console: ConsoleType {
     ///
     /// The table is automatically adjusted so the columns are spaced evenly
     /// across strings of multiple lengths.
-    open func displayTable(withValues values: [[String]], separator: String) {
+    open func displayTable(withValues values: [[ConsoleString]], separator: ConsoleString) {
         // Measure maximum length of values on each column
         var columnWidths: [Int] = []
 
@@ -66,7 +66,7 @@ open class Console: ConsoleType {
                     let rowLength = Console.measureString(row)
                     let spaces = String(repeating: " ", count: columnWidths[i] - rowLength)
 
-                    printLine("\(row)\(separator)\(spaces)", terminator: "")
+                    printLine("\(formatted: row)\(formatted: separator)\(spaces)", terminator: "")
                 } else {
                     printLine(row, terminator: "")
                 }
@@ -75,7 +75,7 @@ open class Console: ConsoleType {
         }
     }
 
-    open func readSureLineWith(prompt: String) -> String {
+    open func readSureLineWith(prompt: ConsoleString) -> String {
         repeat {
             guard let input = readLineWith(prompt: prompt) else {
                 printLine("Invalid input")
@@ -87,7 +87,7 @@ open class Console: ConsoleType {
     }
 
     open func readLineWith(
-        prompt: String,
+        prompt: ConsoleString,
         allowEmpty: Bool = true,
         validate: (String) -> Bool = { _ in true }
     ) -> String? {
@@ -107,7 +107,7 @@ open class Console: ConsoleType {
     }
 
     open func parseLineWith<T>(
-        prompt: String,
+        prompt: ConsoleString,
         allowEmpty: Bool,
         parse: (String) -> ValueReadResult<T>
     ) -> T? {
@@ -135,7 +135,7 @@ open class Console: ConsoleType {
     }
 
     open func readIntWith(
-        prompt: String,
+        prompt: ConsoleString,
         validate: (Int) -> Bool = { _ in true }
     ) -> Int? {
         repeat {
@@ -157,7 +157,7 @@ open class Console: ConsoleType {
         } while true
     }
 
-    open func readLineWith(prompt: String) -> String? {
+    open func readLineWith(prompt: ConsoleString) -> String? {
         printLine(prompt, terminator: " ")
         return readLine()
     }
@@ -166,17 +166,17 @@ open class Console: ConsoleType {
         print(to: &outputSink)
     }
 
-    open func printLine(_ line: String) {
-        print(line, to: &outputSink)
+    open func printLine(_ line: ConsoleString) {
+        _print(line)
     }
 
-    open func printLine(_ line: String, terminator: String) {
-        print(line, terminator: terminator, to: &outputSink)
+    open func printLine(_ line: ConsoleString, terminator: String) {
+        _print(line, terminator: terminator)
     }
 
     open func command(_ command: Terminal.Command) {
         if output.capabilityFlags.contains(.ansiControlSequences) {
-            printLine(command.ansi, terminator: "")
+            output.write(command.ansi)
         }
     }
 
@@ -204,6 +204,17 @@ open class Console: ConsoleType {
 
         try? _runTPut(arguments: ["rmcup"])
         isInAlternativeBuffer = false
+    }
+
+    private func _print(
+        _ line: ConsoleString,
+        terminator: String = "\n"
+    ) {
+        if Self.isNoColorSpecified || !output.capabilityFlags.contains(.ansiControlSequences) {
+            print(line.unformatted(), terminator: terminator, to: &outputSink)
+        } else {
+            print(line.terminalFormatted(), terminator: terminator, to: &outputSink)
+        }
     }
 
     private func _runTPut(arguments: [String]) throws {

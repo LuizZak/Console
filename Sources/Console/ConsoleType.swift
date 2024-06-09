@@ -1,14 +1,14 @@
 /// A publicly-facing protocol for console clients
 public protocol ConsoleType {
     /// Displays an items table on the console.
-    func displayTable(withValues values: [[String]], separator: String)
+    func displayTable(withValues values: [[ConsoleString]], separator: ConsoleString)
 
     /// Reads a line from the console, re-prompting the user until they enter
     /// a non-empty line.
     ///
     /// - Parameter prompt: Prompt to display to the user
     /// - Returns: Result of the prompt
-    func readSureLineWith(prompt: String) -> String
+    func readSureLineWith(prompt: ConsoleString) -> String
 
     /// Reads a line from the console, performing some validation steps with the
     /// user's input.
@@ -22,7 +22,7 @@ public protocol ConsoleType {
     /// input is provided.
     /// - Returns: First input that was correctly validated, or if `allowEmpty` is
     /// `true`, an empty input line, if the user specified no input.
-    func readLineWith(prompt: String, allowEmpty: Bool, validate: (String) -> Bool) -> String?
+    func readLineWith(prompt: ConsoleString, allowEmpty: Bool, validate: (String) -> Bool) -> String?
 
     /// Reads a line from the console, performing a parsing step with the user's
     /// input.
@@ -39,19 +39,19 @@ public protocol ConsoleType {
     /// a result.
     /// - Returns: First input value that was correctly parsed, or if `allowEmpty` is
     /// `true`, nil, if the user specified no input.
-    func parseLineWith<T>(prompt: String, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T?
+    func parseLineWith<T>(prompt: ConsoleString, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T?
 
     /// Reads a line from the console, showing a given prompt to the user.
-    func readLineWith(prompt: String) -> String?
+    func readLineWith(prompt: ConsoleString) -> String?
 
     /// Prints an empty line feed into the console
     func printLine()
 
     /// Prints a line into the console's output with a linefeed terminator
-    func printLine(_ line: String)
+    func printLine(_ line: ConsoleString)
 
     /// Prints a line into the console's output, with a given terminator
-    func printLine(_ line: String, terminator: String)
+    func printLine(_ line: ConsoleString, terminator: String)
 
     /// Performs a terminal command to navigate/alter the output.
     func command(_ command: Terminal.Command)
@@ -76,4 +76,54 @@ public protocol ConsoleType {
 
     /// Makes a new paging client with a given set of configurations
     func makePages(configuration: Pages.PageDisplayConfiguration) -> Pages
+}
+
+extension ConsoleType {
+    func displayTable(withValues values: [[String]], separator: String) {
+        displayTable(
+            withValues: values.map { $0.map(ConsoleString.init(stripping:)) },
+            separator: ConsoleString(stripping: separator)
+        )
+    }
+
+    func readSureLineWith(prompt: String) -> String {
+        readSureLineWith(
+            prompt: ConsoleString(stripping: prompt)
+        )
+    }
+
+    func readLineWith(prompt: String, allowEmpty: Bool, validate: (String) -> Bool) -> String? {
+        readLineWith(
+            prompt: ConsoleString(stripping: prompt),
+            allowEmpty: allowEmpty,
+            validate: validate
+        )
+    }
+
+    func parseLineWith<T>(prompt: String, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T? {
+        parseLineWith(
+            prompt: ConsoleString(stripping: prompt),
+            allowEmpty: allowEmpty,
+            parse: parse
+        )
+    }
+
+    func readLineWith(prompt: String) -> String? {
+        readLineWith(
+            prompt: ConsoleString(stripping: prompt)
+        )
+    }
+
+    func printLine(_ line: String) {
+        printLine(
+            ConsoleString(stripping: line)
+        )
+    }
+
+    func printLine(_ line: String, terminator: String) {
+        printLine(
+            ConsoleString(stripping: line),
+            terminator: terminator
+        )
+    }
 }
