@@ -313,11 +313,57 @@ public class StandardOutputTextStream: ConsoleOutputStream {
         #if Xcode
             return []
         #else
-            return [.ansiControlSequences]
+            if supportColors {
+                return [.ansiControlSequences]
+            } else {
+                return []
+            }
         #endif
+    }
+
+    let supportColors: Bool
+
+    public init(supportColors: Bool = true) {
+        self.supportColors = supportColors
     }
 
     public func write(_ string: String) {
         print(string, separator: "", terminator: "")
+    }
+}
+
+/// Standard error text stream
+public class StandardErrorTextStream: ConsoleOutputStream {
+    public var capabilityFlags: ConsoleOutputCapabilityFlag {
+        #if Xcode
+            return []
+        #else
+            if supportColors {
+                return [.ansiControlSequences]
+            } else {
+                return []
+            }
+        #endif
+    }
+
+    let supportColors: Bool
+
+    public init(supportColors: Bool = true) {
+        self.supportColors = supportColors
+    }
+
+    public func write(_ string: String) {
+        print(string, separator: "", terminator: "", to: &standardError)
+    }
+}
+
+/// An output stream that discards all print calls.
+public class NullOutputStream: ConsoleOutputStream {
+    public var capabilityFlags: ConsoleOutputCapabilityFlag { [] }
+
+    public init() {
+    }
+
+    public func write(_ string: String) {
     }
 }

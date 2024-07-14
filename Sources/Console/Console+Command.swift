@@ -31,11 +31,17 @@ public extension Terminal {
         /// Erase in Line control sequence (`\e[..K`)
         case eraseInLine(EraseInLine)
 
-        /// Move cursor up control sequence (`\e[1A`)
-        case cursorUp
+        /// Move cursor up control sequence (`\e[..A`)
+        case cursorUp(Int = 1)
 
-        /// Move cursor down control sequence (`\e[1B`)
-        case cursorDown
+        /// Move cursor down control sequence (`\e[..B`)
+        case cursorDown(Int = 1)
+
+        /// Move cursor forward control sequence (`\e[..C`)
+        case cursorForward(Int = 1)
+
+        /// Move cursor back control sequence (`\e[..D`)
+        case cursorBack(Int = 1)
     }
 }
 
@@ -113,9 +119,9 @@ public extension Terminal.Command {
         /// Converts this value into its ansi values.
         public var ansiValues: String {
             switch self {
-            case .all: "0"
+            case .all: "2"
             case .toBeginning: "1"
-            case .toEnd: "2"
+            case .toEnd: "0"
             }
         }
     }
@@ -135,11 +141,17 @@ public extension Terminal.Command {
         case .eraseInLine(let args):
             return "\(args.ansiValues)K".ansi
 
-        case .cursorUp:
-            return "1A".ansi
+        case .cursorUp(let count):
+            return "\(count)A".ansi
 
-        case .cursorDown:
-            return "1B".ansi
+        case .cursorDown(let count):
+            return "\(count)B".ansi
+
+        case .cursorForward(let count):
+            return "\(count)C".ansi
+
+        case .cursorBack(let count):
+            return "\(count)D".ansi
         }
     }
 }

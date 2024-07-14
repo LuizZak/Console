@@ -99,7 +99,8 @@ public struct ConsoleString: Hashable, ExpressibleByStringInterpolation {
         /// An unformatted segment.
         case literal(String)
 
-        /// A segment string that has color and formatting information
+        /// A segment string that has color and formatting information.
+        ///
         /// Overrides preceding `formatSet()` segments temporarily.
         case formatted(String, SegmentFormatting)
 

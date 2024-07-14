@@ -14,7 +14,7 @@ public extension Console {
     /// ["NO_COLOR" convention]: https://no-color.org/
     static var isNoColorSpecified: Bool {
         let noColor = ProcessInfo.processInfo.environment["NO_COLOR"]
-        return noColor == nil || noColor == ""
+        return noColor != nil && noColor != ""
     }
 
     /// Returns `true` if the standard input file descriptor (`stdin`) is a
